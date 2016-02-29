@@ -1,0 +1,17 @@
+group 'cl.ejemplos'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.twitter4j:twitter4j-core:4.0.1'
+
+    testCompile 'junit:junit:4.11'
+}
