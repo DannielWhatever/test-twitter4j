@@ -12,6 +12,8 @@ repositories {
 
 dependencies {
     compile 'org.twitter4j:twitter4j-core:4.0.1'
+    compile 'org.apache.spark:spark-core_2.10:1.6.0'
+    compile 'org.apache.spark:spark-streaming_2.10:1.6.0'
 
     testCompile 'junit:junit:4.11'
 }
