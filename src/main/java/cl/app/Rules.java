@@ -7,19 +7,19 @@ import scala.Tuple2;
 import scala.tools.scalap.scalax.util.StringUtil;
 import twitter4j.Status;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Daniel on 29-02-2016.
  */
-public abstract class Rules<Q> {
+public abstract class Rules<Q> implements Serializable {
 
-
-    protected Rules(){}
 
     protected final List<Tuple2<Q,Function<Status,Boolean>>> rules = new ArrayList<>();
-    {
+
+    protected Rules(){
         initRules();
     }
 

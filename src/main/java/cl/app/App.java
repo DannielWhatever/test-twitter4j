@@ -32,7 +32,7 @@ public class App {
 
         // Parallelized with 2 partitions
         JavaRDD<Status> rddX = sc.parallelize(statuses, 2);
-        Rules rules = new ConcretRules();
+        ConcretRules rules = new ConcretRules();
 
 
         rddX.foreach(status -> {
