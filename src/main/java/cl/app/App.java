@@ -1,14 +1,15 @@
 package cl.app;
 
+import org.apache.spark.Accumulator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.VoidFunction;
-import twitter4j.*;
-import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.Status;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * @author daniel.gutierrez
@@ -16,46 +17,52 @@ import java.util.List;
 public class App {
 
     public static void main(String args[]){
-        ConfigurationBuilder cb = new ConfigurationBuilder();
-        cb.setDebugEnabled(true)
-                .setOAuthConsumerKey("DsWFDg7QFvSKvQyjDEIuvbfL5")
-                .setOAuthConsumerSecret("kR8B4k0EBFrnFWzflFHalw57sPetAAjLqyVfpvq36gPGtI5XOk")
-                .setOAuthAccessToken("2755789148-QQQfRKwzA1fYBW3RQlCvPfnZlROHE7CTX8nHTLC")
-                .setOAuthAccessTokenSecret("xloT86ISqVW5koFdiYFEhUPqxmzcOtvaRJWKd4SII5A4F");
-        TwitterFactory tf = new TwitterFactory(cb.build());
-        Twitter twitter = tf.getInstance();
-        List<Status> statuses = new ArrayList<Status>();
-        String screenname = "cht_informatica";
+
+        List<Status> statuses = TwitterSource.getTweets("cht_informatica");
 
         SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("asdads");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        try{
-            for(int i=1;i<=5;i++) {
-                int oldSize = statuses.size();
-                statuses.addAll(twitter.getUserTimeline(screenname, new Paging(i, 200)));
-
-                if(statuses.size()==oldSize)
-                    break;
-            }
-        }catch(TwitterException e){
-            e.printStackTrace();
+        //Fill up Categories.
+        Map<Category,Accumulator<Integer>> categories = new HashMap<>();
+        for(Category category : Category.values()){
+            categories.put(category,sc.accumulator(0));
         }
-        JavaRDD<Status> rdd = sc.parallelize(statuses);
-        System.out.println("Showing @" + screenname + "'s user timeline.");
-        rdd.foreach(
-                (VoidFunction<Status>) status ->
-                        System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText())
+
+        Map<Hour,Accumulator<Integer>> hours = new HashMap<>();
+        for(Hour hour : Hour.values()){
+            hours.put(hour,sc.accumulator(0));
+        }
+
+
+        // Parallelized with 2 partitions
+        JavaRDD<Status> rddX = sc.parallelize(statuses, 2);
+        CategoryRules rules = new CategoryRules();
+
+
+        rddX.foreach(status -> {
+
+            rules.foreach((category,predicate)->{
+                if(predicate.call(status)){
+                    categories.get(category).add(1);
+                }
+            });
+
+
+            hours.get(Hour.of(status.getCreatedAt())).add(1);
+
+        });
+
+        categories.forEach(
+                (category,accumulator)-> System.out.println(category.getName()+" -> "+accumulator.value())
         );
-        System.out.println("count: "+statuses.size());
 
-        // Create a local StreamingContext with two working thread and batch interval of 1 second
-//        SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("NetworkWordCount");
-        //JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
+        hours.forEach(
+                (hour, accumulator) -> System.out.println(hour.getRange()+" -> "+accumulator.value())
+        );
 
-        // Create a DStream that will connect to hostname:port, like localhost:9999
-        //JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
-        //jssc.queueStream()
+
+
 
     }
 

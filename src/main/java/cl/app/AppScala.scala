@@ -1,6 +1,6 @@
 package cl.app
 
-object App {
+object AppScala {
 
   def main(args: Array[String]): Unit = {
     println("Hello, world!")
