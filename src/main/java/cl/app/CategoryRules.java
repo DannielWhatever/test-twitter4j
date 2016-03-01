@@ -3,7 +3,7 @@ package cl.app;
 /**
  * Created by Daniel on 01-03-2016.
  */
-public final class ConcretRules extends Rules<Category> {
+public final class CategoryRules extends Rules<Category> {
 
     @Override
     protected void initRules() {

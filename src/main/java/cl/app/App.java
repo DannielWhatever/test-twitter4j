@@ -29,23 +29,38 @@ public class App {
             categories.put(category,sc.accumulator(0));
         }
 
+        Map<Hour,Accumulator<Integer>> hours = new HashMap<>();
+        for(Hour hour : Hour.values()){
+            hours.put(hour,sc.accumulator(0));
+        }
+
 
         // Parallelized with 2 partitions
         JavaRDD<Status> rddX = sc.parallelize(statuses, 2);
-        ConcretRules rules = new ConcretRules();
+        CategoryRules rules = new CategoryRules();
 
 
         rddX.foreach(status -> {
+
             rules.foreach((category,predicate)->{
                 if(predicate.call(status)){
                     categories.get(category).add(1);
                 }
             });
+
+
+            hours.get(Hour.of(status.getCreatedAt())).add(1);
+
         });
 
         categories.forEach(
                 (category,accumulator)-> System.out.println(category.getName()+" -> "+accumulator.value())
         );
+
+        hours.forEach(
+                (hour, accumulator) -> System.out.println(hour.getRange()+" -> "+accumulator.value())
+        );
+
 
 
 
