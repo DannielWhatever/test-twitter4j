@@ -20,7 +20,7 @@ public class App {
 
         List<Status> statuses = TwitterSource.getTweets("cht_informatica");
 
-        SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("asdads");
+        SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("asdads"); //change for clusterg
         JavaSparkContext sc = new JavaSparkContext(conf);
 
         //Fill up Categories.
@@ -29,15 +29,17 @@ public class App {
             categories.put(category,sc.accumulator(0));
         }
 
+
         Map<Hour,Accumulator<Integer>> hours = new HashMap<>();
         for(Hour hour : Hour.values()){
             hours.put(hour,sc.accumulator(0));
         }
 
+        CategoryRules rules = new CategoryRules();
 
         // Parallelized with 2 partitions
-        JavaRDD<Status> rddX = sc.parallelize(statuses, 2);
-        CategoryRules rules = new CategoryRules();
+        JavaRDD<Status> rddX = sc.parallelize(statuses, 2).cache();
+
 
 
         rddX.foreach(status -> {
