@@ -1,6 +1,7 @@
 package cl.app.rule
 
 import cl.app.`type`.Category
+import twitter4j.Status
 
 /**
   * Created by Daniel on 02-03-2016.
@@ -8,26 +9,27 @@ import cl.app.`type`.Category
 object CategoryRules extends Rules[Category.Value]
   with Serializable{
 
+  private def contain(status:Status,v:String):Boolean={
+    status.getText.toLowerCase.contains(v)
+  }
+
   override protected def initRules(): Unit = {
 
 
     RuleConstructor(Category.JAVA)
-      .add(_.getText.toLowerCase.contains("java"))
+      .add(contain(_,"java"))
       .apply
 
     RuleConstructor(Category.NET)
-      .add(_.getText.toLowerCase.contains(".net"))
+      .add(contain(_,".net"))
       .apply
 
     RuleConstructor(Category.JAVASCRIPT)
-      .add(_.getText.toLowerCase.contains("javascript"))
+      .add(contain(_,"javascript"))
       .apply
 
     RuleConstructor(Category.OTHER)
-      .add(status=>{
-        val text = status.getText.toLowerCase
-        return !(text.contains("java") || text.contains(".net") || text.contains("javascipt"))
-      })
+      .add(contain(_,"php"))
       .apply
 
   }

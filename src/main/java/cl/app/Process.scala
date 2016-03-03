@@ -2,7 +2,6 @@ package cl.app
 
 import cl.app.`type`.{Category, Hour}
 import cl.app.rule.CategoryRules
-import cl.app.spark.Rule
 import cl.app.spark.SparkUtils._
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -19,35 +18,30 @@ class Process(sc: SparkContext) extends Serializable {
 
   val rules = CategoryRules.get
 
-  //process!
-  def process(rdd: RDD[Status]): Process = {
-    rdd.foreach(process(_))
+  def printResults(): Process = {
+    categories.foreach {println}
+    hours.foreach {println}
     return this
   }
 
-  def printResults(): Process = {
-    categories.foreach {
-      println
-    }
-    hours.foreach {
-      println
-    }
+  //process!
+  def process(rdd: RDD[Status]): Process = {
+    rdd.foreach(status=>process(status))
     return this
   }
 
   private def process(status: Status) = {
 
-    rules.foreach(searchInCategories(_))
+    rules.foreach(rule=>{
+      if(rule.predicate(status))
+        increment(categories.get(rule.group))
+    })
 
     //max hour
     increment(hours.get(Hour.of(status.getCreatedAt)))
 
   }
 
-  private def searchInCategories(rule: Rule[Category.Value]) = {
-    print(rule)
-    /*        if(rule.predicate(status))
-        increment(categories.get(rule.group))*/
-  }
+
 
 }
