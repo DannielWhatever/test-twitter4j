@@ -13,8 +13,8 @@ import twitter4j.Status
 class Process(sc: SparkContext) extends Serializable {
 
   //MapCountings
-  val categories = buildMapCounting[Category.Value](Category, sc)
-  val hours = buildMapCounting[Hour.Value](Hour, sc)
+  val categories = buildMapCounting[Category.Value](Category,sc)
+  val hours = buildMapCounting[Hour.Value](Hour,sc)
 
   val rules = CategoryRules.get
 
@@ -34,11 +34,11 @@ class Process(sc: SparkContext) extends Serializable {
 
     rules.foreach(rule=>{
       if(rule.predicate(status))
-        increment(categories.get(rule.group))
+        categories.increment(rule.group)
     })
 
     //max hour
-    increment(hours.get(Hour.of(status.getCreatedAt)))
+    hours.increment(Hour.of(status.getCreatedAt))
 
   }
 
