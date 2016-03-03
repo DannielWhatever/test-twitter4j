@@ -1,4 +1,4 @@
-package cl.app
+package cl.app.twitter
 
 import java.util
 
