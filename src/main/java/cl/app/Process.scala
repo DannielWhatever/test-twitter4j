@@ -1,5 +1,6 @@
 package cl.app
 
+import cl.app.`type`.Hour.of
 import cl.app.`type`.{Category, Hour}
 import cl.app.rule.CategoryRules
 import cl.app.spark.SparkUtils._
@@ -26,11 +27,26 @@ class Process(sc: SparkContext) extends Serializable {
 
   //process!
   def process(rdd: RDD[Status]): Process = {
-    rdd.foreach(status=>process(status))
+    rdd.foreach(process(_))
+
+    val words = rdd.flatMap(_.getText.split(" "))
+
+    val top10 = rdd
+      .flatMap(_.getText.split(" ")) //obtain words
+      .map((_,1)) //parto con 1
+      .reduceByKey(_+_) //wtf, pero la magia, onda, no sé , suma las palabras
+      .map(x=>(x._2,x._1)) //ahora dejo la cantidad como key
+      .sortByKey(false) //y ordeno, desc
+      .take(10) //saco los 10 primeros
+
+    top10.foreach(println(_))
+
     return this
   }
 
   private def process(status: Status) = {
+
+    status.getText.split(" ")
 
     rules.foreach(rule=>{
       if(rule.predicate(status))
@@ -38,7 +54,7 @@ class Process(sc: SparkContext) extends Serializable {
     })
 
     //max hour
-    hours.increment(Hour.of(status.getCreatedAt))
+    hours.increment(of(status.getCreatedAt))
 
   }
 

@@ -7,7 +7,7 @@ object AppScala {
 
   def main(args: Array[String]): Unit = {
 
-    val statuses = TwitterCli.getTweets("cht_informatica")
+    val statuses = TwitterCli.getTweets("boriisrock92")
     statuses.foreach{println}
 
     val sc = Spark.getCtx()
