@@ -12,10 +12,11 @@ repositories {
 }
 
 dependencies {
+    compile 'org.scala-lang:scala-library:2.11.6'
+    compile 'com.typesafe.akka:akka-actor_2.11:2.3.11'
     compile 'org.twitter4j:twitter4j-core:4.0.1'
-    compile 'org.apache.spark:spark-core_2.10:1.6.0'
-    compile 'org.apache.spark:spark-streaming_2.10:1.6.0'
-    compile 'org.scala-lang:scala-library:2.11.1'
+    compile 'org.apache.spark:spark-core_2.11:1.6.0'
+    compile 'org.apache.spark:spark-streaming_2.11:1.6.0'
 
     testCompile 'junit:junit:4.11'
 }

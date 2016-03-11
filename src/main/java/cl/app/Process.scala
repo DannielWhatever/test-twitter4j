@@ -27,7 +27,7 @@ class Process(sc: SparkContext) extends Serializable {
 
   //process!
   def process(rdd: RDD[Status]): Process = {
-    rdd.foreach(process(_))
+    rdd.foreach(process)
 
     val topWords = wordCounts(rdd.flatMap(_.getText.split(" ")))
     val topMentions = wordCounts(rdd.flatMap(_.getUserMentionEntities.map("@"+_.getName)))
@@ -36,8 +36,8 @@ class Process(sc: SparkContext) extends Serializable {
     rdd.filter(_.getGeoLocation.ne(null)).map(_.getGeoLocation.toString).foreach(println)
     //--
 
-    topStatus(rdd,(_.getFavoriteCount)).foreach(println)
-    topStatus(rdd,(_.getRetweetCount)).foreach(println)
+    topStatus(rdd, _.getFavoriteCount).foreach(println)
+    topStatus(rdd, _.getRetweetCount).foreach(println)
 
     topWords.foreach(println(_))
     topMentions.foreach(println(_))
