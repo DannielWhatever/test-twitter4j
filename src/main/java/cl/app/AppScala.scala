@@ -1,6 +1,6 @@
 package cl.app
 
-import cl.app.spark.Spark
+import cl.app.spark.{Process, SparkInit}
 import cl.app.twitter.TwitterCli
 
 object AppScala {
@@ -10,7 +10,7 @@ object AppScala {
     val statuses = TwitterCli.getTweets("dannielwhatever")
     statuses.foreach{println}
 
-    val sc = Spark.getCtx()
+    val sc = SparkInit.getCtx()
 
 
     val rddX = sc.parallelize(statuses, 2).cache()

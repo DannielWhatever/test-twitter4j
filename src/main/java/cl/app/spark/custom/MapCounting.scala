@@ -1,4 +1,4 @@
-package cl.app.spark
+package cl.app.spark.custom
 
 import org.apache.spark.{Accumulator, SparkContext}
 

@@ -1,9 +1,9 @@
-package cl.app
+package cl.app.spark
 
 import cl.app.`type`.Hour.of
 import cl.app.`type`.{Category, Hour}
 import cl.app.rule.CategoryRules
-import cl.app.spark.SparkUtils._
+import cl.app.spark.helper.SparkUtils._
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import twitter4j.Status
@@ -39,8 +39,11 @@ class Process(sc: SparkContext) extends Serializable {
     topStatus(rdd, _.getFavoriteCount).foreach(println)
     topStatus(rdd, _.getRetweetCount).foreach(println)
 
+    val topLang = wordCounts(rdd.map(_.getLang)).take(1)(0)
+
     topWords.foreach(println(_))
     topMentions.foreach(println(_))
+    println("Top Language: "+topLang._2.toString.toUpperCase)
 
     return this
   }

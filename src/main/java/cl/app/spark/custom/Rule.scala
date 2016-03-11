@@ -1,4 +1,4 @@
-package cl.app.spark
+package cl.app.spark.custom
 
 import twitter4j.Status
 

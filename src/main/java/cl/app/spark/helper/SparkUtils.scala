@@ -1,5 +1,6 @@
-package cl.app.spark
+package cl.app.spark.helper
 
+import cl.app.spark.custom.MapCounting
 import org.apache.spark.SparkContext
 
 /**

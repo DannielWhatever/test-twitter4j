@@ -1,6 +1,6 @@
 package cl.app.rule
 
-import cl.app.spark.Rule
+import cl.app.spark.custom.Rule
 import twitter4j.Status
 
 import scala.collection.mutable
