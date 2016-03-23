@@ -1,6 +1,7 @@
 package cl.app.rule
 
 import cl.app.`type`.Category
+import cl.app.`type`.Category.{OTHER, JAVASCRIPT, NET, JAVA}
 import twitter4j.Status
 
 /**
@@ -16,21 +17,21 @@ object CategoryRules extends Rules[Category.Value]
   override protected def initRules(): Unit = {
 
 
-    RuleConstructor(Category.JAVA)
-      .add(contain(_,"java"))
-      .apply
+    forCategory(JAVA)
+      .addRule(contain(_,"java"))
+      .build
 
-    RuleConstructor(Category.NET)
-      .add(contain(_,".net"))
-      .apply
+    forCategory(NET)
+      .addRule(contain(_,".net"))
+      .build
 
-    RuleConstructor(Category.JAVASCRIPT)
-      .add(contain(_,"javascript"))
-      .apply
+    forCategory(JAVASCRIPT)
+      .addRule(contain(_,"javascript"))
+      .build
 
-    RuleConstructor(Category.OTHER)
-      .add(contain(_,"php"))
-      .apply
+    forCategory(OTHER)
+      .addRule(contain(_,"php"))
+      .build
 
   }
 

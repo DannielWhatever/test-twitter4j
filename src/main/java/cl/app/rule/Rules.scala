@@ -10,26 +10,34 @@ import scala.collection.mutable
   */
 trait Rules[Q] {
 
+  private val rules = mutable.ArrayBuffer.empty[Rule[Q]]
+
   protected def initRules()
 
-  private val rules = mutable.ArrayBuffer.empty[Rule[Q]]
-  initRules
+  initRules()
 
   def get:List[Rule[Q]] = rules.toList
 
+  def apply(status:Status,fn:Q=>Unit) = {
+    get.foreach(rule=>{
+      if(rule.predicate(status))
+        fn(rule.group)
+    })
+  }
 
-  protected def forRule(q:Q):RuleConstructor =  RuleConstructor(q)
 
-  protected case class RuleConstructor(q: Q){
+  protected def forCategory(q:Q):RuleConstructor =  RuleConstructor(q)
+
+  protected case class RuleConstructor(val q: Q){
 
     private val tempRules = mutable.ArrayBuffer.empty[Rule[Q]]
 
-    def add(predicate: Status=>Boolean): RuleConstructor = {
+    def addRule(predicate: Status=>Boolean): RuleConstructor = {
       tempRules.+=(new Rule[Q](q, predicate))
       return this
     }
 
-    def apply = rules.++=(tempRules)
+    def build = rules.++=(tempRules)
 
   }
 

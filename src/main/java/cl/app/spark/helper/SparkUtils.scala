@@ -9,8 +9,8 @@ import org.apache.spark.SparkContext
 object SparkUtils{
 
   def buildMapCounting[T](enum: Enumeration,sc:SparkContext): MapCounting[T] = {
-    val mapCounting = new MapCounting[T]
-    enum.values.foreach(value => mapCounting.add(value.asInstanceOf[T],sc))
+    val mapCounting = new MapCounting[T](sc)
+    enum.values.foreach(value => mapCounting.add(value.asInstanceOf[T]))
     return mapCounting
   }
 

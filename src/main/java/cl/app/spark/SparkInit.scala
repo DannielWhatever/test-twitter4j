@@ -10,8 +10,8 @@ object SparkInit {
   private val conf = new SparkConf().setMaster("local[4]").setAppName("TwitterAnalytics")
   private val sc = new SparkContext(conf)
 
-  def getCtx(): SparkContext = {
-    return sc;
+  def getCtx: SparkContext = {
+    return sc
   }
 
 }

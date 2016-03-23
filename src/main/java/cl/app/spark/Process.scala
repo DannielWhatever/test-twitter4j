@@ -17,23 +17,31 @@ class Process(sc: SparkContext) extends Serializable {
   val categories = buildMapCounting[Category.Value](Category,sc)
   val hours = buildMapCounting[Hour.Value](Hour,sc)
 
-  val rules = CategoryRules.get
 
-  def printResults(): Process = {
-    categories.foreach {println}
-    hours.foreach {println}
+  def printResults: Process = {
+    categories.foreach(println)
+    hours.foreach(println)
     return this
   }
 
   //process!
   def process(rdd: RDD[Status]): Process = {
-    rdd.foreach(process)
+    doProcess(rdd)
+    return this
+  }
 
-    val topWords = wordCounts(rdd.flatMap(_.getText.split(" ")))
-    val topMentions = wordCounts(rdd.flatMap(_.getUserMentionEntities.map("@"+_.getName)))
+
+  private def doProcess(rdd: RDD[Status]) ={
+    rdd.collect.foreach(applyRules)
+
+    val rddAllWords = rdd.flatMap(_.getText.split(" ")).cache
+    val rddUserMentions = rdd.flatMap(_.getUserMentionEntities.map("@"+_.getName))
+
+    val topWords = wordCounts(rddAllWords)
+    val topMentions = wordCounts(rddUserMentions)
 
     //TODO: no tengo datos, por ahora
-    rdd.filter(_.getGeoLocation.ne(null)).map(_.getGeoLocation.toString).foreach(println)
+    rdd.filter(_.getGeoLocation.ne(null)).map(_.getGeoLocation.toString).collect.foreach(println)
     //--
 
     topStatus(rdd, _.getFavoriteCount).foreach(println)
@@ -41,25 +49,17 @@ class Process(sc: SparkContext) extends Serializable {
 
     val topLang = wordCounts(rdd.map(_.getLang)).take(1)(0)
 
-    topWords.foreach(println(_))
-    topMentions.foreach(println(_))
+    topWords.foreach(println)
+    topMentions.foreach(println)
     println("Top Language: "+topLang._2.toString.toUpperCase)
-
-    return this
   }
 
-  private def process(status: Status) = {
+  private def applyRules(status: Status) = {
 
-    status.getText.split(" ")
-
-    rules.foreach(rule=>{
-      if(rule.predicate(status))
-        categories.increment(rule.group)
-    })
+    CategoryRules.apply(status,categories.increment)
 
     //max hour
     hours.increment(of(status.getCreatedAt))
-
   }
 
   private def wordCounts(rdd:RDD[String], cant:Int=10):Array[(Int,String)] = {
@@ -67,16 +67,17 @@ class Process(sc: SparkContext) extends Serializable {
       .map((_,1)) //parto con 1
       .reduceByKey(_+_) //wtf, pero la magia, onda, no sé , suma el segundo parametro cuando el key coincide
       .map(x=>(x._2,x._1)) //ahora dejo la cantidad como key
-      .sortByKey(false) //y ordeno, desc
+      .sortByKey(ascending = false) //y ordeno, desc
       .take(cant) //saco los $cant primeros
   }
 
 
   private def topStatus(rdd:RDD[Status], fx:Status=>Int, allowRetweet:Boolean=false, cant:Int=3):Array[(Int,Status)] = {
+    //noinspection ComparingUnrelatedTypes
     return rdd
       .filter(_.isRetweet.equals(allowRetweet))
       .map(status => (fx(status),status))
-      .sortByKey(false)
+      .sortByKey(ascending = false)
       .take(cant)
   }
 
